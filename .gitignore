@@ -9,6 +9,10 @@ runs
 runs/
 evaluate_results/
 .deepspeed*
+slurm-*.out
+
+# LIBERO clone created by scripts/setup_libero.sh
+third_party/LIBERO/
 
 volc/
 tests/
