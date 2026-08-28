@@ -6,8 +6,6 @@
 #
 # Optional env: CKPT, DATASET_STATS, NUM_GPUS, SIGMA_SHIFT
 #SBATCH --job-name=fastwam-libero-eval
-#SBATCH --partition=CHANGEME
-#SBATCH --account=CHANGEME
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
@@ -15,7 +13,9 @@
 #SBATCH --mem=64G
 #SBATCH --time=24:00:00
 #SBATCH --output=slurm-%j-eval.out
-# 1 GPU, 64G RAM (does not take the whole node). A30 is 24GB VRAM.
+# Uses the cluster default partition/account. Override on the command line:
+#   sbatch --partition=NAME scripts/slurm/eval_libero.sbatch
+# 1 GPU, 64G RAM. A30 is 24GB VRAM.
 
 set -euo pipefail
 

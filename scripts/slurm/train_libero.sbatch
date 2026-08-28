@@ -5,8 +5,6 @@
 #
 # Optional env: NPROC_PER_NODE, DIFFSYNTH_MODEL_BASE_PATH, DIFFSYNTH_DOWNLOAD_SOURCE
 #SBATCH --job-name=fastwam-libero-train
-#SBATCH --partition=CHANGEME
-#SBATCH --account=CHANGEME
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
@@ -14,6 +12,7 @@
 #SBATCH --mem=64G
 #SBATCH --time=48:00:00
 #SBATCH --output=slurm-%j-train.out
+# Uses the cluster default partition/account. Override with sbatch --partition=NAME
 # 1 GPU, 64G RAM. Single-A30 training may still OOM; lower batch_size if it does.
 
 set -euo pipefail

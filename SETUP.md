@@ -101,14 +101,35 @@ Stats: `DATASET_STATS`, or `<stem>_dataset_stats.json` next to the ckpt, or `dat
 
 Released paper weights: [yuanty/fastwam](https://huggingface.co/yuanty/fastwam) (`libero_uncond_2cam224.pt` + matching `*_dataset_stats.json`). Those use `EVALUATION.sigma_shift=5.0`. Your own `runs/` ckpts use the config default (`1.0`) unless you set `SIGMA_SHIFT`.
 
-## 6. Run eval (this host may not have working Slurm)
+## 6. Submit eval as a Slurm job
 
-If `sinfo` errors (`Unexpected message received`, accounting disabled), **do not use sbatch**. `hetg5` looks like a GPU box with a broken or leftover Slurm client. Run on the machine that already has the A30s:
+Setup stays in the shell (`./scripts/setup_libero.sh eval`). The GPU eval is `sbatch`, which queues a job and returns your prompt.
+
+Submit from the **login node** (the host you first SSH to), not after `ssh` onto a GPU box like `hetg5`. Compute nodes often cannot talk to the controller (`sinfo: Unexpected message received`).
+
+```bash
+cd ~/FastWAM
+git pull
+# setup must already have succeeded on a shared filesystem so the job sees .venv
+
+sbatch scripts/slurm/eval_libero.sbatch
+squeue -u $USER
+tail -f slurm-*-eval.out
+```
+
+That requests **1 GPU** and **64G RAM** on the default partition. No `--account` (this cluster’s accounting plugin is disabled). If Slurm says you must name a partition:
+
+```bash
+sbatch --partition=PARTITION_FROM_SINFO scripts/slurm/eval_libero.sbatch
+```
+
+If `sinfo` still fails on the login node, try `module load slurm` (or whatever the site docs use) and run `sinfo` again.
+
+Interactive smoke test (blocks your shell; 1 GPU) is still:
 
 ```bash
 source .venv/bin/activate
 source scripts/env_libero.sh
-
 python experiments/libero/eval_libero_single.py \
   task=libero_uncond_2cam224_1e-4 \
   ckpt=./checkpoints/fastwam_release/libero_uncond_2cam224.pt \
@@ -119,10 +140,6 @@ python experiments/libero/eval_libero_single.py \
   EVALUATION.num_trials=1 \
   gpu_id=0
 ```
-
-That is 1 GPU, 1 task, 1 trial.
-
-If Slurm works on another cluster, jobs default to 1 GPU and 64G RAM. Discover partition with `sinfo`. If `sacctmgr` is unsupported, delete `#SBATCH --account=CHANGEME` rather than inventing an account.
 
 ## 7. Manual train / full eval
 
