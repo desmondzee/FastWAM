@@ -22,19 +22,32 @@ cd FastWAM
 
 ## 2. Scratch (HPC)
 
-Do not keep datasets or checkpoints in `$HOME`. Either symlink by hand:
+Only set `FASTWAM_SCRATCH` to a path that already exists and is writable. On many clusters `$SCRATCH` is **unset**; then `export FASTWAM_SCRATCH="$SCRATCH/fastwam"` becomes `/fastwam` and setup fails.
+
+Check first:
 
 ```bash
-mkdir -p "$SCRATCH/fastwam"/{data,checkpoints,runs,evaluate_results}
-ln -sfn "$SCRATCH/fastwam/data" data
-ln -sfn "$SCRATCH/fastwam/checkpoints" checkpoints
-ln -sfn "$SCRATCH/fastwam/runs" runs
-ln -sfn "$SCRATCH/fastwam/evaluate_results" evaluate_results
+echo "SCRATCH=${SCRATCH-<unset>}"
+ls -ld "$SCRATCH" 2>/dev/null || true
 ```
 
-or set `FASTWAM_SCRATCH` before setup (the script creates the same layout).
+If `$SCRATCH` is empty, either skip scratch (files stay in the clone) or pick a real directory:
 
-Disk: LIBERO demos ~5GB compressed; Wan2.2 + ActionDiT backbone tens of GB; training writes extra under `runs/`.
+```bash
+unset FASTWAM_SCRATCH
+# or, example only — use your cluster’s scratch:
+# export FASTWAM_SCRATCH="$HOME/scratch/fastwam"
+```
+
+If you do have a writable scratch root:
+
+```bash
+export FASTWAM_SCRATCH="/path/that/exists/fastwam"
+```
+
+The setup script will create `data`, `checkpoints`, `runs`, and `evaluate_results` under that path and symlink them into the repo.
+
+Disk: eval-only weights are a few GB; LIBERO demos ~5GB compressed; Wan2.2 + ActionDiT backbone tens of GB; training writes extra under `runs/`.
 
 ## 3. Install
 

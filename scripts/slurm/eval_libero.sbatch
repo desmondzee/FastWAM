@@ -14,6 +14,9 @@
 #SBATCH --cpus-per-task=32
 #SBATCH --time=24:00:00
 #SBATCH --output=slurm-%j-eval.out
+# Asks Slurm for 8 GPUs on one node (not every GPU on the cluster).
+# Use --gres=gpu:1 and NUM_GPUS=1 for a smoke test. Set --mem=... if your
+# site has no default and you must not take the whole node's RAM.
 
 set -euo pipefail
 

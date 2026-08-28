@@ -29,6 +29,19 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT}"
 
 if [[ -n "${FASTWAM_SCRATCH:-}" ]]; then
+  if [[ "${FASTWAM_SCRATCH}" != /* ]]; then
+    echo "Error: FASTWAM_SCRATCH must be an absolute path, got: ${FASTWAM_SCRATCH}" >&2
+    exit 1
+  fi
+  scratch_parent="$(dirname "${FASTWAM_SCRATCH}")"
+  if [[ ! -d "${scratch_parent}" || ! -w "${scratch_parent}" ]]; then
+    echo "Error: cannot create FASTWAM_SCRATCH=${FASTWAM_SCRATCH}" >&2
+    echo "Parent ${scratch_parent} is missing or not writable." >&2
+    echo "This usually means \$SCRATCH is unset, so \"\$SCRATCH/fastwam\" became \"/fastwam\"." >&2
+    echo "Fix: unset FASTWAM_SCRATCH   # store files under this repo" >&2
+    echo "  or: export FASTWAM_SCRATCH=/real/scratch/dir/fastwam" >&2
+    exit 1
+  fi
   echo "[setup] linking data/checkpoints/runs/evaluate_results -> ${FASTWAM_SCRATCH}"
   mkdir -p "${FASTWAM_SCRATCH}/data" \
     "${FASTWAM_SCRATCH}/checkpoints" \
