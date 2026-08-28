@@ -100,7 +100,8 @@ uv pip install setuptools wheel
 # Pin the venv interpreter. uv -e install of LIBERO's setup.py-only package
 # is unreliable; PYTHONPATH is the fallback (scripts/env_libero.sh).
 uv pip install -e "${LIBERO_DIR}" --python "${ROOT}/.venv/bin/python" || true
-uv pip install "robosuite==1.4.0" "bddl==1.0.1" easydict
+uv pip install "robosuite==1.4.0" "bddl==1.0.1" easydict \
+  "future==0.18.2" "cloudpickle==2.1.0" "gym==0.25.2"
 uv pip install mujoco==3.3.2
 
 # shellcheck disable=SC1091
