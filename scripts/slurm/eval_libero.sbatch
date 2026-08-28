@@ -36,6 +36,8 @@ if [[ ! -d .venv ]]; then
 fi
 # shellcheck disable=SC1091
 source .venv/bin/activate
+# shellcheck disable=SC1091
+source scripts/env_libero.sh
 
 resolve_ckpt() {
   if [[ -n "${CKPT:-}" ]]; then

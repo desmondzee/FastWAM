@@ -101,30 +101,34 @@ Stats: `DATASET_STATS`, or `<stem>_dataset_stats.json` next to the ckpt, or `dat
 
 Released paper weights: [yuanty/fastwam](https://huggingface.co/yuanty/fastwam) (`libero_uncond_2cam224.pt` + matching `*_dataset_stats.json`). Those use `EVALUATION.sigma_shift=5.0`. Your own `runs/` ckpts use the config default (`1.0`) unless you set `SIGMA_SHIFT`.
 
-## 6. Slurm
+## 6. Run eval (this host may not have working Slurm)
 
-Edit `#SBATCH` partition / account / GPU count at the top of each file, then:
-
-```bash
-# eval released weights (after setup eval)
-sbatch scripts/slurm/eval_libero.sbatch
-
-# train (after setup train). Preprocess + T5 cache run in-job if missing.
-sbatch scripts/slurm/train_libero.sbatch
-
-# eval a trained run
-CKPT=runs/libero_uncond_2cam224_1e-4/<timestamp>/checkpoints/weights/step_XXXXXX.pt \
-  sbatch scripts/slurm/eval_libero.sbatch
-```
-
-Jobs default to **1 GPU** and **64G RAM** (`--gres=gpu:1 --mem=64G`), so they do not take the whole node. Override with `NPROC_PER_NODE` (train) or `NUM_GPUS` (eval) if you change `--gres`.
-
-## 7. Manual commands (same as the wrappers)
+If `sinfo` errors (`Unexpected message received`, accounting disabled), **do not use sbatch**. `hetg5` looks like a GPU box with a broken or leftover Slurm client. Run on the machine that already has the A30s:
 
 ```bash
 source .venv/bin/activate
-export DIFFSYNTH_DOWNLOAD_SOURCE=huggingface
-export DIFFSYNTH_MODEL_BASE_PATH="$(pwd)/checkpoints"
+source scripts/env_libero.sh
+
+python experiments/libero/eval_libero_single.py \
+  task=libero_uncond_2cam224_1e-4 \
+  ckpt=./checkpoints/fastwam_release/libero_uncond_2cam224.pt \
+  EVALUATION.dataset_stats_path=./checkpoints/fastwam_release/libero_uncond_2cam224_dataset_stats.json \
+  EVALUATION.sigma_shift=5.0 \
+  EVALUATION.task_suite_name=libero_spatial \
+  EVALUATION.task_id=0 \
+  EVALUATION.num_trials=1 \
+  gpu_id=0
+```
+
+That is 1 GPU, 1 task, 1 trial.
+
+If Slurm works on another cluster, jobs default to 1 GPU and 64G RAM. Discover partition with `sinfo`. If `sacctmgr` is unsupported, delete `#SBATCH --account=CHANGEME` rather than inventing an account.
+
+## 7. Manual train / full eval
+
+```bash
+source .venv/bin/activate
+source scripts/env_libero.sh
 
 bash scripts/train_zero1.sh 1 task=libero_uncond_2cam224_1e-4
 

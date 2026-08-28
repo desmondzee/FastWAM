@@ -96,14 +96,28 @@ else
 fi
 
 echo "[setup] LIBERO into the FastWAM env (no LIBERO torch/numpy pins)"
-uv pip install -e "${LIBERO_DIR}"
+uv pip install setuptools wheel
+# Pin the venv interpreter. uv -e install of LIBERO's setup.py-only package
+# is unreliable; PYTHONPATH is the fallback (scripts/env_libero.sh).
+uv pip install -e "${LIBERO_DIR}" --python "${ROOT}/.venv/bin/python" || true
 uv pip install "robosuite==1.4.0" "bddl==1.0.1" easydict
 uv pip install mujoco==3.3.2
 
-python - <<'PY'
+# shellcheck disable=SC1091
+source "${ROOT}/scripts/env_libero.sh"
+
+"${ROOT}/.venv/bin/python" - <<'PY'
+import sys
 import torch
+
+print(f"[setup] python {sys.executable}")
 print(f"[setup] torch {torch.__version__} cuda={torch.cuda.is_available()}")
-import libero.libero  # noqa: F401
+try:
+    import libero.libero  # noqa: F401
+except ModuleNotFoundError:
+    print("Error: import libero.libero failed.", file=sys.stderr)
+    print("PYTHONPATH=", sys.path, file=sys.stderr)
+    raise
 print("[setup] import libero.libero ok")
 PY
 
@@ -153,9 +167,10 @@ fi
 
 echo
 echo "[setup] done (mode=${MODE})"
-echo "  activate:  source ${ROOT}/.venv/bin/activate"
+echo "  activate:  source ${ROOT}/.venv/bin/activate && source ${ROOT}/scripts/env_libero.sh"
+echo "  If sinfo/sbatch is broken on this host, skip Slurm and run eval_libero_single.py (see SETUP.md)."
 if [[ "${MODE}" == "eval" ]]; then
-  echo "  next:      sbatch scripts/slurm/eval_libero.sbatch"
+  echo "  next:      sbatch scripts/slurm/eval_libero.sbatch   # only if Slurm works"
 else
   echo "  next:      sbatch scripts/slurm/train_libero.sbatch"
   echo "             then eval with CKPT=runs/.../checkpoints/weights/step_XXXXXX.pt"
