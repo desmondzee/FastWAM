@@ -100,8 +100,15 @@ uv pip install setuptools wheel
 # Pin the venv interpreter. uv -e install of LIBERO's setup.py-only package
 # is unreliable; PYTHONPATH is the fallback (scripts/env_libero.sh).
 uv pip install -e "${LIBERO_DIR}" --python "${ROOT}/.venv/bin/python" || true
-uv pip install "robosuite==1.4.0" "bddl==1.0.1" easydict \
-  "future==0.18.2" "cloudpickle==2.1.0" "gym==0.25.2"
+uv pip install \
+  "robosuite==1.4.0" \
+  "bddl==1.0.1" \
+  easydict \
+  "future==0.18.2" \
+  "cloudpickle==2.1.0" \
+  "gym==0.25.2" \
+  matplotlib \
+  opencv-python
 uv pip install mujoco==3.3.2
 
 # shellcheck disable=SC1091
@@ -114,12 +121,12 @@ import torch
 print(f"[setup] python {sys.executable}")
 print(f"[setup] torch {torch.__version__} cuda={torch.cuda.is_available()}")
 try:
-    import libero.libero  # noqa: F401
+    from libero.libero.envs import OffScreenRenderEnv  # noqa: F401
 except ModuleNotFoundError:
-    print("Error: import libero.libero failed.", file=sys.stderr)
+    print("Error: LIBERO env import failed.", file=sys.stderr)
     print("PYTHONPATH=", sys.path, file=sys.stderr)
     raise
-print("[setup] import libero.libero ok")
+print("[setup] import libero.libero.envs.OffScreenRenderEnv ok")
 PY
 
 CKPT_DIR="${ROOT}/checkpoints/fastwam_release"
