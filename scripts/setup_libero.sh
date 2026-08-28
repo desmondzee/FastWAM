@@ -81,7 +81,11 @@ uv pip install torch==2.7.1+cu128 torchvision==0.22.1+cu128 \
   --index-url https://download.pytorch.org/whl/cu128
 
 echo "[setup] FastWAM (pip -e .)"
-uv pip install -e "${ROOT}" --extra-index-url https://download.pytorch.org/whl/cu128
+# Torch wheels live on the cu128 index; packaging and the rest live on PyPI.
+# uv otherwise pins packaging to the first index that has the name (cu128) and fails.
+uv pip install -e "${ROOT}" \
+  --extra-index-url https://download.pytorch.org/whl/cu128 \
+  --index-strategy unsafe-best-match
 
 LIBERO_DIR="${ROOT}/third_party/LIBERO"
 if [[ ! -d "${LIBERO_DIR}/.git" ]]; then

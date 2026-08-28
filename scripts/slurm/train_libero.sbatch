@@ -9,10 +9,12 @@
 #SBATCH --account=CHANGEME
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --gres=gpu:8
-#SBATCH --cpus-per-task=64
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --time=48:00:00
 #SBATCH --output=slurm-%j-train.out
+# 1 GPU, 64G RAM. Single-A30 training may still OOM; lower batch_size if it does.
 
 set -euo pipefail
 
@@ -41,7 +43,7 @@ mkdir -p "${DIFFSYNTH_MODEL_BASE_PATH}"
 if [[ -n "${SLURM_GPUS_ON_NODE:-}" ]]; then
   NPROC_PER_NODE="${NPROC_PER_NODE:-${SLURM_GPUS_ON_NODE}}"
 else
-  NPROC_PER_NODE="${NPROC_PER_NODE:-8}"
+  NPROC_PER_NODE="${NPROC_PER_NODE:-1}"
 fi
 
 BACKBONE="${DIFFSYNTH_MODEL_BASE_PATH}/ActionDiT_linear_interp_Wan22_alphascale_1024hdim.pt"

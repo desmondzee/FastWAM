@@ -10,13 +10,12 @@
 #SBATCH --account=CHANGEME
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --gres=gpu:8
-#SBATCH --cpus-per-task=32
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
 #SBATCH --time=24:00:00
 #SBATCH --output=slurm-%j-eval.out
-# Asks Slurm for 8 GPUs on one node (not every GPU on the cluster).
-# Use --gres=gpu:1 and NUM_GPUS=1 for a smoke test. Set --mem=... if your
-# site has no default and you must not take the whole node's RAM.
+# 1 GPU, 64G RAM (does not take the whole node). A30 is 24GB VRAM.
 
 set -euo pipefail
 
@@ -92,7 +91,7 @@ STATS_PATH="$(resolve_stats "${CKPT_PATH}")"
 if [[ -n "${SLURM_GPUS_ON_NODE:-}" ]]; then
   NUM_GPUS="${NUM_GPUS:-${SLURM_GPUS_ON_NODE}}"
 else
-  NUM_GPUS="${NUM_GPUS:-8}"
+  NUM_GPUS="${NUM_GPUS:-1}"
 fi
 
 SIGMA_ARGS=()

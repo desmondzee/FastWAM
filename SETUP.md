@@ -117,7 +117,7 @@ CKPT=runs/libero_uncond_2cam224_1e-4/<timestamp>/checkpoints/weights/step_XXXXXX
   sbatch scripts/slurm/eval_libero.sbatch
 ```
 
-Override GPU count with `NPROC_PER_NODE` (train) or `NUM_GPUS` (eval).
+Jobs default to **1 GPU** and **64G RAM** (`--gres=gpu:1 --mem=64G`), so they do not take the whole node. Override with `NPROC_PER_NODE` (train) or `NUM_GPUS` (eval) if you change `--gres`.
 
 ## 7. Manual commands (same as the wrappers)
 
@@ -126,12 +126,12 @@ source .venv/bin/activate
 export DIFFSYNTH_DOWNLOAD_SOURCE=huggingface
 export DIFFSYNTH_MODEL_BASE_PATH="$(pwd)/checkpoints"
 
-bash scripts/train_zero1.sh 8 task=libero_uncond_2cam224_1e-4
+bash scripts/train_zero1.sh 1 task=libero_uncond_2cam224_1e-4
 
 python experiments/libero/run_libero_manager.py \
   task=libero_uncond_2cam224_1e-4 \
   ckpt=./checkpoints/fastwam_release/libero_uncond_2cam224.pt \
   EVALUATION.dataset_stats_path=./checkpoints/fastwam_release/libero_uncond_2cam224_dataset_stats.json \
   EVALUATION.sigma_shift=5.0 \
-  MULTIRUN.num_gpus=8
+  MULTIRUN.num_gpus=1
 ```
